@@ -3,11 +3,11 @@ const mongoose = require('mongoose');
 
 //creating a schema
 const todoSchema = new mongoose.Schema({
-  task: {
+  todo: {
     type: String,
     required: [true, 'Todo must have a name'],
     unique: true,
-    trimm: true,
+    trim: true,
   },
   description: { type: String, trim: true },
   createdAt: {
