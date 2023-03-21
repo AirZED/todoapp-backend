@@ -55,8 +55,7 @@ exports.editTodo = async (req, res) => {
     const newTodo = await Todo.findByIdAndUpdate(
       { _id: todoId },
       { $set: req.body },
-      { runValidators: true },
-      {new: true}
+      { runValidators: true, new: true }
     );
     serverResponse(res, 200, newTodo)
   } catch (error) {
