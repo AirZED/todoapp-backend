@@ -7,7 +7,7 @@ const todoRouter = require('./routes/todoRoutes');
 
 // initializing app js
 const app = express();
-app.use(cors())
+app.use(cors()) //The cors package exports a function which serves as a middleware that handles cors related issues
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }

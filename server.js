@@ -30,5 +30,5 @@ const port = process.env.PORT || 3000;
 
 app.listen(port, () => {
   connectDatabase() //Initialize the database connection once the server starts
-  console.log(`app is running at port ${port}`);
+  console.log(`App is running at port ${port}`);
 });
