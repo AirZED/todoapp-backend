@@ -17,18 +17,18 @@ const DB = process.env.DB_CONNECTION_STRING.replace(
 //setting strict query to false
 mongoose.set('strictQuery', false);
 
-mongoose
-  .connect(DB, {})
-  .then(() => {
-    console.log('Connection to database is successful');
-  })
-  .catch((err) => {
-    console.log('Connection to DB Failed');
-    console.log(err);
-  });
-
+//Function for database connection
+async function connectDatabase(){
+  try{
+    await mongoose.connect(DB)
+  }catch(err){
+    console.log('Database connection failed')
+    console.error(err)
+  }
+}
 const port = process.env.PORT || 3000;
 
 app.listen(port, () => {
+  connectDatabase() //Initialize the database connection once the server starts
   console.log(`app is running at port ${port}`);
 });
