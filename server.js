@@ -21,6 +21,7 @@ mongoose.set('strictQuery', false);
 async function connectDatabase(){
   try{
     await mongoose.connect(DB)
+    console.log('Database connection successful')
   }catch(err){
     console.log('Database connection failed')
     console.error(err)
