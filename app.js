@@ -1,14 +1,13 @@
 const express = require('express');
 const morgan = require('morgan');
+const cors = require('cors')
 
-//importing routers
-// const todoRouter = require(`${__dirname}/routes/todoRoutes`);
 
 const todoRouter = require('./routes/todoRoutes');
 
 // initializing app js
 const app = express();
-
+app.use(cors())
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
@@ -16,6 +15,7 @@ if (process.env.NODE_ENV === 'development') {
 //make the middleware that enables the availability of the req on the req.body
 app.use(express.json());
 
+//I hope you understand that this function is just to demonstrate that express is structured in a middleware style and that you can manipulate an incoming request by strategically placing a middleware
 app.use((req, res, next) => {
   console.log('Hello from the middleware');
   const date = new Date();
