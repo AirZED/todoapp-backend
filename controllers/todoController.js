@@ -1,156 +1,64 @@
 const Todo = require('./../models/todoModel');
 
+//Function to handle successful responses
+function serverResponse(res, code, data){
+  return res.status(code).json({status: 'success', data})
+}
+//function to handle error
+function serverErrorHandler(res, code, err){
+  return res.status(code).json({status: 'failed', error: err.message})
+}
+
 exports.createTodo = async (req, res) => {
   try {
-    const newTodo = await Todo.create(req.body);
-
-    res.status(201).json({
-      status: 'success',
-      data: {
-        todo: newTodo,
-      },
-    });
+    const todo = await Todo.create(req.body);
+    serverResponse(res, 201, todo)
   } catch (error) {
-    res.status(401).json({
-      message: 'failed',
-      error: {
-        error,
-      },
-    });
+   serverErrorHandler(res, 500, error) //This error handling is not robust - also check status codes, try returning proper status codes
   }
 };
 
 exports.getAllTodos = async (req, res) => {
   try {
-    //We need to first of all do a deep copy of the req.query object
-    const queryObj = { ...req.query };
-    const excludedFields = ['page', 'limit', 'sort', 'fields'];
-
-    //We need to remove this fields from the shallow object before using it to find,
-    //incase we dont only want to find, we want to also sort, limit etc
-    excludedFields.forEach((each) => delete queryObj[each]);
-
-    //we also check for greater than and lessthan signs to include dollar signs infront of them
-    let queryStr = JSON.stringify(queryObj);
-    queryStr = queryStr.replace(/\b(gte|gt|lt|lte)\b/g, (match) => `$${match}`);
-
-    //dont await here
-    //await down there
-    let query = Todo.find(JSON.parse(queryStr));
-
-    // 2. Sorting
-    if (req.query.sort) {
-      const sortStr = req.query.sort.split(',').join(' ');
-      query = query.sort(sortStr);
-    }
-
-    //3. Limiting
-    if (req.query.fields) {
-      const fields = req.query.split(',').join(' ');
-      query = query.select(fields);
-    } else {
-      query = query.select('-__v');
-    }
-
-    //4. Pagination
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-
-    const skip = (page - 1) * limit;
-    query = query.skip(skip).limit(limit);
-
-    if (req.query.page) {
-      const numTodos = await Todo.countDocuments();
-      if (numTodos < skip) {
-        throw new Error('This page does not exist');
-      }
-    }
-
-    //searching upon query
-    const allTodos = await query;
-
-    res.status(200).json({
-      status: 'success',
-      length: allTodos.length,
-      data: {
-        todos: allTodos,
-      },
-    });
+    //I removed the previous code because it is not necessary, do not worry about pagination for now. When you need it, study it, Jonas makes it complex
+    //for now you just want to find all, so do just that
+   const todos = await Todo.find({})
+   serverResponse(res,200, {length: todos.length, todos})
   } catch (error) {
-    res.status(404).json({
-      message: 'failed',
-      error: {
-        error,
-      },
-    });
+   serverErrorHandler(res, 500, error)
   }
 };
 
 exports.getSingleTodo = async (req, res) => {
   try {
-    const { id: todoId } = req.params;
-    const todo = await Todo.find({ _id: todoId });
-
-    res.status(200).json({
-      status: 'success',
-      data: {
-        todo,
-      },
-    });
+    const { id } = req.params;
+    const todo = await Todo.findOne({ _id: id }); //Find returns an array, find one returns a single document which is what you want here
+    serverResponse(res, 200, todo)
   } catch (error) {
-    res.status(404).json({
-      status: 'failed',
-      error: {
-        error,
-      },
-    });
+    serverErrorHandler(res, 500, error)
   }
 };
 
 exports.deleteSingleTodo = async (req, res) => {
   try {
-    const { id: todoId } = req.params;
-
-    const newTodo = await Todo.findOneAndDelete({ _id: todoId });
-
-    res.status(204).json({
-      status: 'success',
-      data: {
-        todo: newTodo,
-      },
-    });
+    const { id } = req.params;
+    await Todo.findOneAndDelete({ _id: id });
+    serverResponse(res, 204, null) //I do not recommed 204 when doing a delete, 204 returns no content but at times you may want to return a message, you can use 200 instead
   } catch (error) {
-    res.status(404).json({
-      status: 'failed',
-      error: {
-        error,
-      },
-    });
+    serverErrorHandler(res, 500, error)
   }
 };
 
 exports.editTodo = async (req, res) => {
   try {
     const { id: todoId } = req.params;
-
     const newTodo = await Todo.findByIdAndUpdate(
       { _id: todoId },
       { $set: req.body },
-      { runValidators: true }
+      { runValidators: true, new: true }
     );
-
-    res.status(200).json({
-      status: 'success',
-      data: {
-        todo: newTodo,
-      },
-    });
+    serverResponse(res, 200, newTodo)
   } catch (error) {
-    res.status(404).json({
-      status: 'failed',
-      error: {
-        error,
-      },
-    });
+    serverErrorHandler(res, 500, error)
   }
 };

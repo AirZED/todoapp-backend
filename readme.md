@@ -1,3 +1,5 @@
-My first backend application
+# My first backend application
 
-This readme is not going to look very nice but it is strictly for documentation throughout this project.
+## CRUD API to power a todo api
+
+API for a TODO application
